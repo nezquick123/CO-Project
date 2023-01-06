@@ -7,7 +7,6 @@
 #include "fstream"
 using namespace std;
 
-
 class Gen{
 public:
     int task_id;
@@ -95,14 +94,14 @@ vector<Genome> generate_random(int *t, int t_n, int proc, int gen_n){
     }
     default_random_engine defEngine(time(nullptr));
     uniform_int_distribution<int> intDistro(1, proc);
-    uniform_int_distribution<int> intmax(0, INT32_MAX);
+    //uniform_int_distribution<int> intmax(0, INT32_MAX);
     vector<Genome> gen_arr;
     for(int i = 0; i < gen_n; i++){
         Genome g(proc);
         int curr_proc;
         int task_time;
         for(int j = 0; j < t_n; j++){
-            task_time = intmax(defEngine);
+            task_time = j;
             curr_proc = intDistro(defEngine);
             g.addGen(task[j], curr_proc, task_time);
         }
@@ -149,15 +148,17 @@ void crossover(Genome &gen1, Genome &gen2){
 bool sortcond(const vector <int> & v1, const vector <int> & v2){
     return v1[1] < v2[1];
 }
-//Na razie najlepsze: 600 250 250 0.1 1140
+//Na razie najlepsze: pupulation: 600, crossover_n: 250, mutation_n: 250, elite_ratio:0.1
 
-int main() { //TODO: losowe startpointy
-    int population = 600; // Even number
-    int iteration_n = 1500000, crossover_n = 250, mutation_n = 250;
-    float elite_ratio = 0.1;
+int main() {
+    //PARAMETERS ---------------------------------------
     srand(time(nullptr));
+    int population = 600; // Even number
+    int iteration_n = 1500000, crossover_n = 250, mutation_n = 250, runnig_time = 300;//seconds
+    float elite_ratio = 0.1;
     ifstream file;
     file.open("m50n200.txt");
+    //-------------------------------------------------
     int proc_n, tasks_n;
     file >> proc_n;
     file >> tasks_n;
@@ -166,11 +167,12 @@ int main() { //TODO: losowe startpointy
         file >> task_tab[i];
     }
 
+    clock_t start = clock(); // start clock
     vector <Genome> g_arr;
     vector <vector <int>> idcmax (population + crossover_n);
     vector <Genome> rand_arr;
     g_arr = generate_random(task_tab, tasks_n, proc_n, population/2);
-    for(int iter = 0; iter < iteration_n; iter++) {
+    for(int iter = 0; iter < iteration_n &&(clock() - start)<runnig_time*CLOCKS_PER_SEC; iter++) {
         vector<Genome> sel_arr = g_arr;
         //print_gen(g_arr);
         // mutate
@@ -208,9 +210,6 @@ int main() { //TODO: losowe startpointy
             g_arr[i] = sel_arr[j++];
         }
         cout <<iter << " PCmax = " << g_arr[0].cMax() << endl;
-        if (g_arr[0].cMax() == 5){
-            cout<<"XD\n";
-        }
     }
     cout << "PCmax = " << g_arr[0].cMax() << endl;
     for(int i = 0; i < tasks_n; i++){
