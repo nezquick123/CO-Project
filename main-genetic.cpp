@@ -47,7 +47,7 @@ public:
     void addGen(int task_len, int proc_id, int start_time){
         Gen g(tk_id, proc_id, start_time, task_len);
         tk_id++;
-        //nextInitTime[proc_id-1] += task_len+1;
+        nextInitTime[proc_id-1] += task_len+1;
         gens_vec.push_back(g);
     }
     void sortgen(){
@@ -114,6 +114,38 @@ vector<Genome> generate_random(int *t, int t_n, int proc, int gen_n){
     return gen_arr;
 }
 
+vector<Genome> generate_greedy(int *t, int t_n, int proc, int gen_n){
+    int *task = new int[t_n];
+    for(int i = 0; i < t_n; i++){
+        task[i] = t[i];
+    }
+    vector<Genome> gen_arr;
+    for(int i = 0; i < gen_n; i++){
+        Genome g(proc);
+        int curr_proc = 0;
+        int task_time;
+
+        for(int j = 0; j < t_n; j++){
+            int min = g.nextInitTime[0];
+            for(int p = 0; p < proc; p++){
+                if (g.nextInitTime[p] <= min) {
+                    min = g.nextInitTime[p];
+                    curr_proc = p;
+                }
+            }
+            //g.repair();
+            g.addGen(task[j], curr_proc+1, min);
+        }
+    /*    for(int j = 0; j < t_n; j++){
+          g.gens_vec[j].print();
+        }*/
+
+        gen_arr.push_back(g);
+    }
+    return gen_arr;
+}
+
+
 
 
 
@@ -153,7 +185,7 @@ bool sortcond(const vector <int> & v1, const vector <int> & v2){
 int main() {
     //PARAMETERS ---------------------------------------
     srand(time(nullptr));
-    int population = 600; // Even number
+    int population = 600, greedy_n = 40; // Even number
     int iteration_n = 1500000, crossover_n = 250, mutation_n = 250, runnig_time = 300;//seconds
     float elite_ratio = 0.1;
     ifstream file;
@@ -204,8 +236,15 @@ int main() {
         for (i = 0; i < int((population + crossover_n)*elite_ratio); i++) { // select
             g_arr[i] = sel_arr[idcmax[i][0]];
         }
-        sel_arr = generate_random(task_tab, tasks_n, proc_n, (population+crossover_n)-int((population+crossover_n)*elite_ratio));
+        sel_arr = generate_greedy(task_tab, tasks_n, proc_n, greedy_n);
         int j = 0;
+        int istart = i;
+        for(i; i < greedy_n+istart; i++){
+         //   cout << sel_arr[j].cMax() <<endl;
+            g_arr[i] = sel_arr[j++];
+        }
+        sel_arr = generate_random(task_tab, tasks_n, proc_n, (population+crossover_n)-int((population+crossover_n)*elite_ratio));
+        j = 0;
         for (i ; i < g_arr.size(); i++) { // select DO P
             g_arr[i] = sel_arr[j++];
         }
