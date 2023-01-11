@@ -47,7 +47,7 @@ public:
     void addGen(int task_len, int proc_id, int start_time){
         Gen g(tk_id, proc_id, start_time, task_len);
         tk_id++;
-        nextInitTime[proc_id-1] += g.stop_time+1;
+        nextInitTime[proc_id-1] = g.stop_time+1;
         gens_vec.push_back(g);
     }
     void sortgen(){
@@ -60,7 +60,7 @@ public:
             if(i.stop_time>m)
                 m = i.stop_time;
         }
-        return m;
+        return m+1;
     }
 
     void repair(){
@@ -186,10 +186,10 @@ int main() {
     //PARAMETERS ---------------------------------------
     srand(time(nullptr));
     int population = 600, greedy_n = 20; // Even number
-    int iteration_n = 1500000, crossover_n = 200, mutation_n = 200, runnig_time = 10;//seconds
+    int iteration_n = 1500000, crossover_n = 200, mutation_n = 200, runnig_time = 300;//seconds
     float elite_ratio = 0.1;
     ifstream file;
-    file.open("test0.txt");
+    file.open("m50n200.txt");
     //-------------------------------------------------
     int proc_n, tasks_n;
     file >> proc_n;
@@ -240,7 +240,7 @@ int main() {
         int j = 0;
         int istart = i;
         for(i; i < greedy_n+istart; i++){
-         //   cout << sel_arr[j].cMax() <<endl;
+           // cout << sel_arr[j].cMax() <<endl;
             g_arr[i] = sel_arr[j++];
         }
         sel_arr = generate_random(task_tab, tasks_n, proc_n, (population+crossover_n)-int((population+crossover_n)*elite_ratio));
