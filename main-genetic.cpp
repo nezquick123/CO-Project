@@ -19,7 +19,7 @@ public:
         proc_id = pid;
         start_time = start;
         len = length;
-        stop_time = start + length;
+        stop_time = start + length-1;
     }
     void print(){
         cout << "["<<task_id << ", " << proc_id << ", " << start_time << ", " << stop_time <<"], ";
@@ -47,7 +47,7 @@ public:
     void addGen(int task_len, int proc_id, int start_time){
         Gen g(tk_id, proc_id, start_time, task_len);
         tk_id++;
-        nextInitTime[proc_id-1] += task_len+1;
+        nextInitTime[proc_id-1] += g.stop_time+1;
         gens_vec.push_back(g);
     }
     void sortgen(){
@@ -185,11 +185,11 @@ bool sortcond(const vector <int> & v1, const vector <int> & v2){
 int main() {
     //PARAMETERS ---------------------------------------
     srand(time(nullptr));
-    int population = 600, greedy_n = 40; // Even number
-    int iteration_n = 1500000, crossover_n = 250, mutation_n = 250, runnig_time = 300;//seconds
+    int population = 600, greedy_n = 20; // Even number
+    int iteration_n = 1500000, crossover_n = 200, mutation_n = 200, runnig_time = 10;//seconds
     float elite_ratio = 0.1;
     ifstream file;
-    file.open("m50n200.txt");
+    file.open("test0.txt");
     //-------------------------------------------------
     int proc_n, tasks_n;
     file >> proc_n;
